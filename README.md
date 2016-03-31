@@ -7,7 +7,7 @@ ____________________________________
 
 * Quick summary
 
-This class was developed as an alternative for $this->view() in CodeIgniter, allowing you to organize a clean hierarchy for
+This class was developed as an alternative for `$this->view()` in CodeIgniter, allowing you to organize a clean hierarchy for
 your fragments i.e. Modals or alerts. This class allows you to use variable a particular part of the view instead of using
 
 `$this->view('path/to/the/fragments/my_fragment', $data).`
@@ -19,7 +19,7 @@ ____________________________
 * Configuration
 
 1. Copy file to the corresponding directory in your application and create a same folders in your view
-2. Open config/constants.php and put this is the last line of the file
+2. Open `config/constants.php` and put this is the last line of the file
 `define('D', DIRECTORY_SEPARATOR);`
 3. Extends your controller to My_Controller
 4. Use `parent::render($data)` in your method
