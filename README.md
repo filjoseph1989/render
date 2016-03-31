@@ -37,6 +37,10 @@ _______________________________
 _________________________
 
 * Repo owner or admin
-This class is created by: Fil Joseph Elman
+
+This class is created by 
+
+Fil Joseph Elman
+filjoseph22@gmail.com
 
 * Other community or team contact
