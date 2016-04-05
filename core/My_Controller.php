@@ -9,16 +9,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * @author fil josepn elman
  * @email filjoseph22@gmail.com
- * @date Dec 10, 2015
  * @date Mar 31, 2016
+ * @date Apr 04, 2016
  * @since 1.0.0
  * @version 1.0.0
  */
 class My_Controller extends CI_Controller {
-  private $template         = "template".D;
-  private $content          = "content".D;
-  private $fragment         = "fragments".D;
-  private $modal            = "modals".D;
+  private $content          = "content/";
+  private $fragment         = "fragments/";
+  private $modal            = "modals/";
   private $content_variable = array ();
 
   /**
