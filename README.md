@@ -1,6 +1,7 @@
 # RENDER #
 
 An simple and clean alternative class to render your view in CodeIgniter.
+Please do not use this until its first release
 
 ### What is this repository for? ###
 ____________________________________
