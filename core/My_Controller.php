@@ -1,103 +1,138 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
-
+if (!defined('BASEPATH')) exit('No direct script access allowed');
 /**
- * Class My_Controller Defined as the extension of some classes in the contrllers directory
+ * Class My_Controller
  *
- * Maps to the following URL
- * 		http://your-website.com/your-conttroller
- *
- * @author fil josepn elman
- * @email filjoseph22@gmail.com
- * @date Mar 31, 2016
- * @date Apr 04, 2016
+ * @author filjoseph elman, dindo gaitmaitan
+ * @email fil.elman@greyandgreentech.com
+ * @email dindogaitmaitan@greyandgreentech.com
+ * @date 04-25-2016
+ * @date 04-26-2016
  * @since 1.0.0
  * @version 1.0.0
  */
-class My_Controller extends CI_Controller {
-  private $content          = "content/";
-  private $fragment         = "fragments/";
-  private $modal            = "modals/";
-  private $content_variable = array ();
+abstract class MY_Controller extends CI_Controller {
+	protected $title    = 'Sample Title';
+  protected $sections = array();
+	protected $class		= array();
+	protected $js	  		= array();
 
-  /**
-	 * Include the parent's contructor to inhirit all the function
-	 */
-  public function __construct () {
-    parent::__construct ();
-  }
-
-  /**
-	 * This method is responsible for showing the entire htnl layout
-   * to the web browser.
-   * @param array $data - accepts data from the controller use for html content
+	/**
+	 * A constructor of a class which prepare My_controller as an object
 	 * @return none
 	 */
-  protected function render ($data=array()) {
-    $this->content_variable ($data);
-    $this->get_header ();
-    $this->get_fragment ();
+  public function __construct () {
+		parent::__construct();
+		$sections = array(
+			'content' 	 => null,
+			'title'   	 => $this->title,
+			'css'				 => $this->class,
+      'js' 				 => $this->js
+		);
+		$this->sections = $sections;
+	}
+
+	/**
+	 * This method is responsible for rendering the html page
+	 * @param string $template, The given filename of file inside template directory
+	 * @param array $sections, The given data
+	 */
+	public function render ($template_name, $sections = array()) {
+		$this->sections = array_merge($this->sections, $sections);
+		$this->get_fragment ();
     $this->get_content ();
+    $this->get_header ();
     $this->get_footer ();
-  }
+		$this->load->view('templates/'.$template_name, $this->sections);
+	}
 
-  /**
-	 * This method is responsible for creating a variable use for view
-   * @param array $data - accept data
+	/**
+	 * This method is responsible for getting the fragments/ files
+	 * or templates/files if exist
+   * @return none
 	 */
-  protected function content_variable ($data=array()) {
-    $this->content_variable = $data;
-  }
-
-  /**
-	 * Include the header file
-	 */
-  protected function get_header () {
-    $header = $this->fragment.'header';
-    $this->load->view($header, $this->content_variable);
+  protected function get_fragment () {
+		if (isset($this->sections['fragments'])) {
+			foreach ($this->sections['fragments'] as $key => $value) {
+				if (!is_array($value)) {
+					$filename = VIEWPATH . 'fragments/' . $value;
+					if (file_exists($filename.'.php')) {
+						$filename = 'fragments/'.$value;
+						if (strpos($value, '/') !== false) {
+				      $index = basename($value);
+							$this->sections[$index] = $this->load->view ($filename, $this->sections, TRUE);
+						} else {
+							$this->sections[$value] = $this->load->view ($filename, $this->sections, TRUE);
+						}
+					}
+				}
+			}
+		}
   }
 
   /**
 	 * Include the content file
 	 */
   protected function get_content () {
-    if (isset($this->content_variable['content'])) {
-      $filename = $this->content . $this->content_variable['content'];
-      unset ($this->content_variable['content']);
-      $this->load->view ($filename, $this->content_variable);
+		if (isset($this->sections['content'])) {
+			$filename = 'content/'.$this->sections['content'];
+			$this->sections['content'] = $this->load->view ($filename, $this->sections, true);
+		}
+  }
+
+	/**
+	 * The the content of the header
+	 * @param string $string, path to header
+	 * @return none
+	 */
+	protected function get_header ($header=null) {
+		if (isset($header)) {
+			$header = "fragments/$header";
+			$this->sections['header'] = $this->load->view ($header, $this->sections, TRUE);
+		} else {
+			$header = "fragments/main/header";
+			$this->sections['header'] = $this->load->view ($header, $this->sections, TRUE);
+		}
+	}
+
+	/**
+	 * The the content of the header
+	 * @param string $string, path to header
+	 * @return none
+	 */
+	protected function get_footer ($footer=null) {
+		if (isset($footer)) {
+			$footer = "fragments/$footer";
+			$this->sections['footer'] = $this->load->view ($footer, $this->sections, TRUE);
+		} else {
+			$footer = "fragments/main/footer";
+			$this->sections['footer'] = $this->load->view ($footer, $this->sections, TRUE);
+		}
+	}
+
+  public function set_title ($title, $short_title = null) {
+    $this->title       = $this->title;
+    $this->short_title = $title;
+    if ($short_title  != null) {
+      $this->short_title = $short_title;
     }
   }
 
-  /**
-	 * This method is responsible for rendering the footer.php
-   * into the browser.
-   * @return none
-	 */
-  protected function get_footer () {
-    $footer = $this->fragment.'footer';
-    $this->load->view ($footer, $this->content_variable);
+  protected function check_admin () {
+    if (!$this->auth->user_access('admin'))
+    redirect('home');
   }
 
-  /**
-	 * This method is responsible for including the fragments
-   * and modal into the header.php, content/*, and footer.php
-   * @return none
-	 */
-  protected function get_fragment () {
-    foreach ($this->content_variable as $key => $value) {
-      if (!is_array($value)) {
-        $filename = VIEWPATH . $this->fragment . $value;
-        if (file_exists($filename.'.php')) {
-          $filename = $this->fragment.$value;
-          $this->content_variable[$key] = $this->load->view ($filename, $this->content_variable, TRUE);
-        }
-        $filename = VIEWPATH . $this->modal . $value;
-        if (file_exists($filename.'.php')) {
-          $filename = $this->modal.$value;
-          $this->content_variable[$key] = $this->load->view ($filename, $this->content_variable, TRUE);
-        }
-      }
-    }
+  protected function check_user() {
+    if (!$this->auth->user_is_logged())
+    redirect('home');
   }
 
+  protected function get_active_nav() {
+    return $this->active_nav;
+  }
+
+  protected function set_active_nav($nav) {
+    $this->active_nav = strtolower($nav);
+  }
 }
