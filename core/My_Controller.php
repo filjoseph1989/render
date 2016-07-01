@@ -9,13 +9,13 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  * @email fil.elman@greyandgreentech.com
  * @email dindo@greyandgreentech.com
  * @date 04-25-2016
- * @date 05/24/2016
+ * @date 06/10/2016
  * @since 1.0.0
  * @version 1.1.2
  */
 abstract class MY_Controller extends CI_Controller {
 	protected $title     = COMPANY_NAME;
-  protected $content   = array();
+  protected $content   = null;
   protected $sections  = array();
 	protected $css       = array();
 	protected $js        = array();
@@ -32,7 +32,7 @@ abstract class MY_Controller extends CI_Controller {
 			'title'   	 => $this->title,
 			'css'				 => $this->css,
       'js' 				 => $this->js,
-			'user'  		 => $this->ion_auth->user()->row()
+			'user'			 => $this->ion_auth->user()->row() # Should not belong to sections, but to data
 		);
 	}
 
@@ -79,7 +79,13 @@ abstract class MY_Controller extends CI_Controller {
 	}
 
 	/**
-	 * Get the modal html
+	 * Get the html modal from the directory view/content/
+	 *
+	 * Usage: Controller
+	 * 	$data['modals'] = array('Checklists/modals/index');
+	 *
+	 * Usage: View
+	 * 	echo $index;
 	 *
 	 * @param string $string, path to header
 	 * @return none
@@ -109,7 +115,7 @@ abstract class MY_Controller extends CI_Controller {
 	 * @return none
 	 */
   protected function get_content () {
-		if (isset($this->sections['content'])) {
+		if (! is_null($this->sections['content'])) {
 			$filename = 'content'.DIRECTORY_SEPARATOR.$this->sections['content'];
 			$this->sections['content'] = $this->load->view ($filename, $this->sections, true);
 		}
@@ -148,6 +154,16 @@ abstract class MY_Controller extends CI_Controller {
 	}
 
 	/**
+   * Return values assign to $this->sections, based on the given index
+	 *
+	 * @author fil joseph elman
+	 * @param array
+	 */
+	protected function get_section ( $array_index ) {
+		return $this->sections[$array_index];
+	}
+
+	/**
 	 * Set version on css and js
 	 *
 	 * @author fil joseph elman
@@ -155,8 +171,33 @@ abstract class MY_Controller extends CI_Controller {
 	 * @return none
 	 */
 	protected function set_version () {
-		self::_split($this->sections['css']);
-		self::_split($this->sections['js']);
+		self::set_version__split($this->sections['css'], 'css');
+		self::set_version__split($this->sections['js'], 'js');
+	}
+
+	/**
+   * Find the string "?v=" if exist in $value,
+   * if found, separate version from $value,
+	 *
+	 * Use: to set version in your controller
+	 * 	$data[css] = array ('custom.css?v=1.1.1');
+	 *
+	 * @author fil joseph elman
+	 * @param array
+	 */
+	private function set_version__split ( $arr = array(), $index='', $version = true ) {
+		foreach ($arr as $key => $value) {
+			$temp = explode('?', $value);
+			if (($pos = strpos($value, '?v=')) !== false) {
+				$this->sections[$index][$key] = array($temp[0], "?".$temp[1]);
+			} else {
+				if ( $version === true ) {
+					$this->sections[$index][$key] = array($temp[0], "?v=".CI_VERSION);
+				} else {
+					$this->sections[$index][$key] = array($temp[0], "");
+				}
+			}
+		}
 	}
 
   protected function set_title ($title, $short_title = null) {
@@ -218,20 +259,5 @@ abstract class MY_Controller extends CI_Controller {
 		}
 	}
 
-	/**
-   * Find the string "?v=" if exist in $value,
-   * if found, separate version from $value
-	 *
-	 * @author fil joseph elman
-	 * @param array
-	 */
-	private function _split ( $arr = array() ) {
-		foreach ($arr as $key => $value) {
-			if (($pos = strpos($value, '?v=')) !== false) {
-				$temp = explode('?', $value);
-				$this->sections['css'][$key] = array($temp[0], $temp[1]);
-			}
-		}
-	}
 }
 # vim: ts=4 sw=4 smartindent
