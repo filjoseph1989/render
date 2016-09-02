@@ -9,7 +9,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  * @email fil.elman@greyandgreentech.com
  * @email dindo@greyandgreentech.com
  * @date 04-25-2016
- * @date 06/10/2016
+ * @date 7/20/2016
  * @since 1.0.0
  * @version 1.1.2
  */
@@ -41,7 +41,7 @@ abstract class MY_Controller extends CI_Controller {
 	 * @param string $template, The given filename of file inside template directory
 	 * @param array $sections, The given data
 	 */
-	public function render ($template_name, $sections = array()) {
+	public function render ($template_name, $sections = array(), $bol = FALSE) {
 		$this->sections = array_merge($this->sections, $sections);
 		$this->get_fragment ();
 		$this->get_modals ();
@@ -50,11 +50,11 @@ abstract class MY_Controller extends CI_Controller {
     $this->get_footer ();
     $this->set_version ();
 
-		$this->load->view('templates'.DIRECTORY_SEPARATOR.$template_name, $this->sections);
+		return $this->load->view('templates'.DIRECTORY_SEPARATOR.$template_name, $this->sections, $bol);
 	}
 
 	/**
-	 * This method is responsible for getting the fragments/ files
+	 * This method is responsible for getting the content of fragments/ files
 	 * or templates/files if exist
 	 *
    * @return none
@@ -63,7 +63,7 @@ abstract class MY_Controller extends CI_Controller {
 		if (isset($this->sections['fragments'])) {
 			foreach ($this->sections['fragments'] as $key => $value) {
 				if (!is_array($value)) {
-					$filename = VIEWPATH . 'fragments'.DIRECTORY_SEPARATOR . $value;
+					$filename = VIEWPATH.'fragments'.DIRECTORY_SEPARATOR.$value;
 					if (file_exists($filename.'.php')) {
 						$filename = 'fragments'.DIRECTORY_SEPARATOR.$value;
 						if (strpos($value, '/') !== false) {
@@ -161,6 +161,21 @@ abstract class MY_Controller extends CI_Controller {
 	 */
 	protected function get_section ( $array_index ) {
 		return $this->sections[$array_index];
+	}
+
+	/**
+   * Get the object called ion_auth
+	 *
+	 * @author fil joseph elman
+	 * @param array
+	 */
+	protected function get__ion_auth ( $index ) {
+		switch ($index) {
+			case 'groups':
+				$index = $this->ion_auth->groups()->result_array();
+				break;
+		}
+		return $index;
 	}
 
 	/**
